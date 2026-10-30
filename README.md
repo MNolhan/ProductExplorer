@@ -51,3 +51,7 @@ L'interface est découpée en petits composables réutilisables, qui reçoivent 
 <img src="Image/Preview_Dispo.png" alt="Preview_Dispo" width="300">
 <img src="Image/Preview_NonDispo.png" alt="Preview_NonDispo" width="300">
 <img src="Image/Preview_Home.png" alt="Preview_Home" width="300">
+
+## Résultat sur téléphone
+
+<img src="Image/HomeTelephone.png" alt="HomeTéléphone" width="300">
