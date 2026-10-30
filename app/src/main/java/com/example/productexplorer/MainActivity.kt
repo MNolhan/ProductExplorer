@@ -46,6 +46,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// --- Function
+
 fun sampleProduct(): ProductUi {
     return ProductUi(
         title = "Smartphone Toto X",
@@ -61,6 +63,22 @@ fun sampleProduct(): ProductUi {
     )
 }
 
+fun sampleProductOutOfStock(): ProductUi {
+    return ProductUi(
+        title = "Casque Audio Pulse",
+        brand = "SoundPeak",
+        category = "Audio",
+        description = "Un casque confortable conçu pour écouter de la musique, " +
+                "suivre des cours en ligne et travailler dans de bonnes conditions.",
+        price = 129.99,
+        discountPercentage = 8.0,
+        rating = 4.2,
+        stock = 0,
+        warrantyInformation = "Garantie constructeur : 1 an",
+        shippingInformation = "Produit temporairement indisponible"
+    )
+}
+
 // --- Preview
 
 @Preview(showBackground = true)
@@ -73,6 +91,18 @@ fun ProductDetailScreenPreview() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun ProductDetailScreenOutOfStockPreview() {
+    ProductExplorerTheme {
+        ProductDetailScreen(
+            product = sampleProductOutOfStock(),
+            onAddToCartClick = {}
+        )
+    }
+}
+
 
 // --- Data Class
 
@@ -147,7 +177,7 @@ fun ProductDetailScreen(
                 .fillMaxWidth()
                 .padding(top = 16.dp)
         )
-        
+
         AddToCartButton(
             onClick = onAddToCartClick,
             modifier = Modifier
