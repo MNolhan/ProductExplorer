@@ -108,11 +108,13 @@ fun ProductDetailScreen(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
+
         ProductHeader(
             title = product.title,
             brand = product.brand,
             category = product.category
         )
+
         ProductPriceCard(
             price = product.price,
             discountPercentage = product.discountPercentage,
@@ -120,20 +122,24 @@ fun ProductDetailScreen(
                 .fillMaxWidth()
                 .padding(top = 16.dp)
         )
+
         ProductRating(
             rating = product.rating,
             modifier = Modifier.padding(top = 16.dp)
         )
+
         ProductDescription(
             description = product.description,
             modifier = Modifier.padding(top = 16.dp)
         )
+
         ProductWarrantyField(
             warrantyInformation = product.warrantyInformation,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)
         )
+
         ProductAvailabilityCard(
             stock = product.stock,
             shippingInformation = product.shippingInformation,
@@ -141,6 +147,7 @@ fun ProductDetailScreen(
                 .fillMaxWidth()
                 .padding(top = 16.dp)
         )
+        
         AddToCartButton(
             onClick = onAddToCartClick,
             modifier = Modifier
