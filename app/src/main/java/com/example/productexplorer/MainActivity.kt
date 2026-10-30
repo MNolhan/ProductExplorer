@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// --- Function
+// --- Function Sample
 
 fun sampleProduct(): ProductUi {
     return ProductUi(
@@ -136,6 +136,9 @@ data class ProductUi(
 
 // --- Composants
 
+// ######################################## -- Page Home -- ########################################
+
+// Page Home
 @Composable
 fun ProductHomeScreen(
     featuredProduct: ProductUi,
@@ -162,6 +165,7 @@ fun ProductHomeScreen(
     }
 }
 
+// Contient le Titre et sous-titre
 @Composable
 fun HomeHeader(
     modifier: Modifier = Modifier
@@ -178,6 +182,7 @@ fun HomeHeader(
     }
 }
 
+//Barre de recherche
 @Composable
 fun SearchPreviewBar(
     modifier: Modifier = Modifier
@@ -195,6 +200,7 @@ fun SearchPreviewBar(
     }
 }
 
+// Carte d'un Produit mis en avant
 @Composable
 fun FeaturedProductSection(
     product: ProductUi,
@@ -236,6 +242,7 @@ fun FeaturedProductSection(
     }
 }
 
+// Information les plus Important du produit mis en avant
 @Composable
 fun ProductQuickInfoRow(
     price: Double,
@@ -259,6 +266,7 @@ fun ProductQuickInfoRow(
     }
 }
 
+// liste des catégorie des produits
 @Composable
 fun CategoriesSection(
     modifier: Modifier = Modifier
@@ -279,6 +287,7 @@ fun CategoriesSection(
     }
 }
 
+// Etiquette réutilisable qui affiche une catégorie
 @Composable
 fun CategoryChip(
     label: String,
@@ -297,6 +306,7 @@ fun CategoryChip(
     }
 }
 
+// Section qui affiche l'offre du Jour
 @Composable
 fun DailyOfferBox(
     modifier: Modifier = Modifier
@@ -337,6 +347,9 @@ fun DailyOfferBox(
     }
 }
 
+// ####################################### -- Page Detail -- #######################################
+
+// Page Detail
 @Composable
 fun ProductDetailScreen(
     product: ProductUi,
@@ -403,6 +416,7 @@ fun ProductDetailScreen(
     }
 }
 
+// Titre, Brand et Catégorie
 @Composable
 fun ProductHeader(
     title: String,
@@ -426,6 +440,7 @@ fun ProductHeader(
     }
 }
 
+// Section affichant le prix et la remise
 @Composable
 fun ProductPriceCard(
     price: Double,
@@ -448,6 +463,7 @@ fun ProductPriceCard(
     }
 }
 
+// Section affichant l'image
 @Composable
 fun ProductImage(
     productTitle: String,
@@ -460,6 +476,7 @@ fun ProductImage(
     )
 }
 
+// Section affichant la note moyenne du Produit
 @Composable
 fun ProductRating(
     rating: Double,
@@ -477,6 +494,7 @@ fun ProductRating(
     }
 }
 
+// Section affichant le stock du produit et le temps de livraison estimé
 @Composable
 fun ProductAvailabilityCard(
     stock: Int,
@@ -503,6 +521,7 @@ fun ProductAvailabilityCard(
     }
 }
 
+// Section affichant la description
 @Composable
 fun ProductDescription(
     description: String,
@@ -521,6 +540,7 @@ fun ProductDescription(
     }
 }
 
+// Section affichant le textField en lecture seul (la garantie)
 @Composable
 fun ProductWarrantyField(
     warrantyInformation: String,
@@ -537,6 +557,7 @@ fun ProductWarrantyField(
     )
 }
 
+// Section affichant le bouton
 @Composable
 fun AddToCartButton(
     onClick: () -> Unit,
