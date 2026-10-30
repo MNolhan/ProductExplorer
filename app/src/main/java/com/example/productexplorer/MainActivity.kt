@@ -87,6 +87,17 @@ fun sampleProductOutOfStock(): ProductUi {
 
 @Preview(showBackground = true)
 @Composable
+fun ProductHomeScreenPreview() {
+    ProductExplorerTheme {
+        ProductHomeScreen(
+            featuredProduct = sampleProduct(),
+            onFeaturedProductClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 fun ProductDetailScreenPreview() {
     ProductExplorerTheme {
         ProductDetailScreen(
@@ -140,15 +151,14 @@ fun ProductHomeScreen(
         Spacer(modifier = Modifier.height(24.dp))
         SearchPreviewBar()
         Spacer(modifier = Modifier.height(24.dp))
-        CategoriesSection()
-        Spacer(modifier = Modifier.height(24.dp))
-        DailyOfferBox()
-        Spacer(modifier = Modifier.height(12.dp))
         FeaturedProductSection(
             product = featuredProduct,
             onClick = onFeaturedProductClick
         )
         Spacer(modifier = Modifier.height(24.dp))
+        CategoriesSection()
+        Spacer(modifier = Modifier.height(24.dp))
+        DailyOfferBox()
     }
 }
 
