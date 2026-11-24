@@ -190,6 +190,37 @@ data class ProductUi(
 
 // --- Composants
 
+@Composable
+fun ProductListItem(
+    product: ProductUi,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = product.title,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = product.brand,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "${product.price} € • ★ ${product.rating}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = onClick) {
+                Text(text = "Voir le produit")
+            }
+        }
+    }
+}
+
 // ######################################## -- Page Home -- ########################################
 
 // Page Home
@@ -228,14 +259,23 @@ fun ProductCatalogScreen(
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        // Ajoute une marge intérieure autour du contenu de la liste
         verticalArrangement = Arrangement.spacedBy(16.dp)
-        // Ajoute un espace vertical entre les éléments de la liste.
     ) {
         item {
             Text(
                 text = "Catalogue produits",
                 style = MaterialTheme.typography.headlineMedium
+            )
+        }
+        items(
+            items = products,
+            key = { product -> product.id }
+        ) { product ->
+            ProductListItem(
+                product = product,
+                onClick = {
+                    onProductClick(product)
+                }
             )
         }
     }
