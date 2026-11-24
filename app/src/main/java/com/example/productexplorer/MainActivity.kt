@@ -136,6 +136,10 @@ fun sampleProducts(): List<ProductUi> {
     )
 }
 
+fun sampleCategories(): List<String> {
+    return listOf("Smartphones", "Audio", "Wearables", "Maison")
+}
+
 // --- Preview
 
 @Preview(showBackground = true)
@@ -221,6 +225,21 @@ fun ProductListItem(
     }
 }
 
+@Composable
+fun CategoryRow(
+    categories: List<String>,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(categories) { category ->
+            CategoryChip(label = category)
+        }
+    }
+}
+
 // ######################################## -- Page Home -- ########################################
 
 // Page Home
@@ -267,6 +286,11 @@ fun ProductCatalogScreen(
                 style = MaterialTheme.typography.headlineMedium
             )
         }
+
+        item {
+            CategoryRow(categories = sampleCategories())
+        }
+
         items(
             items = products,
             key = { product -> product.id }
