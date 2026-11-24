@@ -175,6 +175,17 @@ fun ProductDetailScreenOutOfStockPreview() {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun ProductCatalogScreenPreview() {
+    ProductExplorerTheme {
+        ProductCatalogScreen(
+            products = sampleProducts(),
+            onProductClick = {}
+        )
+    }
+}
+
 
 // --- Data Class
 
@@ -284,6 +295,13 @@ fun ProductCatalogScreen(
             Text(
                 text = "Catalogue produits",
                 style = MaterialTheme.typography.headlineMedium
+            )
+        }
+
+        item {
+            Text(
+                text = "Explorez une sélection de produits disponibles localement.",
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
