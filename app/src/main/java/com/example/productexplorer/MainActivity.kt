@@ -38,11 +38,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -270,32 +275,58 @@ data class ProductCatalogUiState(
 
 class ProductCatalogViewModel : ViewModel() {
     private val allProducts: List<ProductUi> = sampleProducts()
-    val categories: List<String> = sampleCategories()
+    private val allCategories: List<String> = sampleCategories()
 
-    var searchQuery by mutableStateOf("")
-        private set
+    private val _uiState = MutableStateFlow(
+        ProductCatalogUiState(
+            products = allProducts,
+            categories = allCategories
+        )
+    )
+
+    val uiState: StateFlow<ProductCatalogUiState> = _uiState.asStateFlow()
+
     fun onSearchQueryChange(newValue: String) {
-        searchQuery = newValue
-    }
-
-    var showOnlyInStock by mutableStateOf(false)
-        private set
-    fun onToggleStockFilter() {
-        showOnlyInStock = !showOnlyInStock
-    }
-
-    var favoriteProductIds by mutableStateOf(listOf<Int>())
-        private set
-    fun onFavoriteClick(productId: Int) {
-        favoriteProductIds = if (favoriteProductIds.contains(productId)) {
-            favoriteProductIds - productId
-        } else {
-            favoriteProductIds + productId
+        _uiState.update { currentState ->
+            currentState.copy(
+                searchQuery = newValue,
+                products = filterProducts(
+                    searchQuery = newValue,
+                    showOnlyInStock = currentState.showOnlyInStock
+                )
+            )
         }
     }
 
-    val filteredProducts: List<ProductUi>
-        get() = allProducts.filter { product ->
+    fun onToggleStockFilter() {
+        _uiState.update { currentState ->
+            val newShowOnlyInStock = !currentState.showOnlyInStock
+            currentState.copy(
+                showOnlyInStock = newShowOnlyInStock,
+                products = filterProducts(
+                    searchQuery = currentState.searchQuery,
+                    showOnlyInStock = newShowOnlyInStock
+                )
+            )
+        }
+    }
+
+    fun onFavoriteClick(productId: Int) {
+        _uiState.update { currentState ->
+            val newFavoriteIds =
+                if (currentState.favoriteProductIds.contains(productId)) {
+                    currentState.favoriteProductIds - productId
+                } else {
+                    currentState.favoriteProductIds + productId
+                }
+            currentState.copy(
+                favoriteProductIds = newFavoriteIds
+            )
+        }
+    }
+
+    private fun filterProducts(searchQuery: String, showOnlyInStock: Boolean): List<ProductUi> {
+        return allProducts.filter { product ->
             val matchesSearch =
                 product.title.contains(searchQuery, ignoreCase = true) ||
                         product.brand.contains(searchQuery, ignoreCase = true) ||
@@ -304,6 +335,7 @@ class ProductCatalogViewModel : ViewModel() {
                 !showOnlyInStock || product.stock > 0
             matchesSearch && matchesStock
         }
+    }
 }
 
 // --- Composants
@@ -434,14 +466,15 @@ fun ProductCatalogContainer(
     modifier: Modifier = Modifier,
     viewModel: ProductCatalogViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     ProductCatalogScreen(
-        products = viewModel.filteredProducts,
-        categories = viewModel.categories,
-        searchQuery = viewModel.searchQuery,
+        products = uiState.products,
+        categories = uiState.categories,
+        searchQuery = uiState.searchQuery,
         onSearchQueryChange = viewModel::onSearchQueryChange,
-        showOnlyInStock = viewModel.showOnlyInStock,
+        showOnlyInStock = uiState.showOnlyInStock,
         onToggleStockFilter = viewModel::onToggleStockFilter,
-        favoriteProductIds = viewModel.favoriteProductIds,
+        favoriteProductIds = uiState.favoriteProductIds,
         onFavoriteClick = viewModel::onFavoriteClick,
         onProductClick = onProductClick,
         modifier = modifier
@@ -678,7 +711,7 @@ fun ProductListItem(
                 Button(onClick = onFavoriteClick) {
                     Text(
                         text = if (isFavorite) {
-                            "Retirer des favoris"
+                            "★ Retirer des favoris"
                         } else {
                             "Ajouter aux favoris"
                         }
