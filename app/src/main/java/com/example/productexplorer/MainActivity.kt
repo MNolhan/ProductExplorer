@@ -40,9 +40,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,8 +52,6 @@ class MainActivity : ComponentActivity() {
             ProductExplorerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ProductCatalogContainer(
-                        products = sampleProducts(),
-                        categories = sampleCategories(),
                         onProductClick = {
                             // Plus tard : ouvrir le détail du produit
                         },
@@ -189,11 +187,17 @@ fun ProductDetailScreenOutOfStockPreview() {
     name = "Catalogue - Dark Theme"
 )
 @Composable
-fun ProductCatalogContainerDarkPreview() {
+fun ProductCatalogScreenDarkPreview() {
     ProductExplorerTheme(darkTheme = true) {
-        ProductCatalogContainer(
+        ProductCatalogScreen(
             products = sampleProducts(),
             categories = sampleCategories(),
+            searchQuery = "audio",
+            onSearchQueryChange = {},
+            showOnlyInStock = true,
+            onToggleStockFilter = {},
+            favoriteProductIds = listOf(2),
+            onFavoriteClick = {},
             onProductClick = {}
         )
     }
@@ -204,11 +208,17 @@ fun ProductCatalogContainerDarkPreview() {
     name = "Catalogue - Light Theme"
 )
 @Composable
-fun ProductCatalogContainerLightPreview() {
+fun ProductCatalogScreenLightPreview() {
     ProductExplorerTheme(darkTheme = false) {
-        ProductCatalogContainer(
+        ProductCatalogScreen(
             products = sampleProducts(),
             categories = sampleCategories(),
+            searchQuery = "",
+            onSearchQueryChange = {},
+            showOnlyInStock = false,
+            onToggleStockFilter = {},
+            favoriteProductIds = listOf(1),
+            onFavoriteClick = {},
             onProductClick = {}
         )
     }
@@ -247,6 +257,46 @@ data class ProductUi(
     val warrantyInformation: String,
     val shippingInformation: String
 )
+
+// --- ViewModel
+
+class ProductCatalogViewModel : ViewModel() {
+    private val allProducts: List<ProductUi> = sampleProducts()
+    val categories: List<String> = sampleCategories()
+
+    var searchQuery by mutableStateOf("")
+        private set
+    fun onSearchQueryChange(newValue: String) {
+        searchQuery = newValue
+    }
+
+    var showOnlyInStock by mutableStateOf(false)
+        private set
+    fun onToggleStockFilter() {
+        showOnlyInStock = !showOnlyInStock
+    }
+
+    var favoriteProductIds by mutableStateOf(listOf<Int>())
+        private set
+    fun onFavoriteClick(productId: Int) {
+        favoriteProductIds = if (favoriteProductIds.contains(productId)) {
+            favoriteProductIds - productId
+        } else {
+            favoriteProductIds + productId
+        }
+    }
+
+    val filteredProducts: List<ProductUi>
+        get() = allProducts.filter { product ->
+            val matchesSearch =
+                product.title.contains(searchQuery, ignoreCase = true) ||
+                        product.brand.contains(searchQuery, ignoreCase = true) ||
+                        product.category.contains(searchQuery, ignoreCase = true)
+            val matchesStock =
+                !showOnlyInStock || product.stock > 0
+            matchesSearch && matchesStock
+        }
+}
 
 // --- Composants
 
@@ -372,60 +422,24 @@ fun ProductCatalogScreen(
 
 @Composable
 fun ProductCatalogContainer(
-    products: List<ProductUi>,
-    categories: List<String>,
     onProductClick: (ProductUi) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ProductCatalogViewModel = viewModel()
 ) {
-    var searchQuery by rememberSaveable {
-        mutableStateOf("")
-    }
-    var showOnlyInStock by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var favoriteProductIds by rememberSaveable {
-        mutableStateOf(listOf<Int>())
-    }
-
-    fun toggleFavorite(productId: Int) {
-        favoriteProductIds = if (favoriteProductIds.contains(productId)) {
-            favoriteProductIds - productId
-        } else {
-            favoriteProductIds + productId
-        }
-    }
-
-    val filteredProducts = remember(products, searchQuery, showOnlyInStock) {
-        products.filter { product ->
-            val matchesSearch =
-                product.title.contains(searchQuery, ignoreCase = true) ||
-                        product.brand.contains(searchQuery, ignoreCase = true) ||
-                        product.category.contains(searchQuery, ignoreCase = true)
-            val matchesStock =
-                !showOnlyInStock || product.stock > 0
-            matchesSearch && matchesStock
-        }
-    }
-
     ProductCatalogScreen(
-        products = filteredProducts,
-        categories = categories,
-        searchQuery = searchQuery,
-        onSearchQueryChange = { newValue ->
-            searchQuery = newValue
-        },
-        showOnlyInStock = showOnlyInStock,
-        onToggleStockFilter = {
-            showOnlyInStock = !showOnlyInStock
-        },
-        favoriteProductIds = favoriteProductIds,
-        onFavoriteClick = { productId ->
-            toggleFavorite(productId)
-        },
+        products = viewModel.filteredProducts,
+        categories = viewModel.categories,
+        searchQuery = viewModel.searchQuery,
+        onSearchQueryChange = viewModel::onSearchQueryChange,
+        showOnlyInStock = viewModel.showOnlyInStock,
+        onToggleStockFilter = viewModel::onToggleStockFilter,
+        favoriteProductIds = viewModel.favoriteProductIds,
+        onFavoriteClick = viewModel::onFavoriteClick,
         onProductClick = onProductClick,
         modifier = modifier
     )
 }
+
 
 // Contient le Titre et sous-titre
 @Composable
