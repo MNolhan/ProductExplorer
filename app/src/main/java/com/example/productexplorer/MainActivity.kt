@@ -203,6 +203,8 @@ fun ProductCatalogScreenDarkPreview() {
             onToggleStockFilter = {},
             favoriteProductIds = listOf(2),
             onFavoriteClick = {},
+            showOnlyFavorites = false,
+            onToggleFavoritesFilter = {},
             onProductClick = {}
         )
     }
@@ -224,6 +226,8 @@ fun ProductCatalogScreenLightPreview() {
             onToggleStockFilter = {},
             favoriteProductIds = listOf(1),
             onFavoriteClick = {},
+            showOnlyFavorites = false,
+            onToggleFavoritesFilter = {},
             onProductClick = {}
         )
     }
@@ -242,6 +246,8 @@ fun ProductCatalogScreenStatelessPreview() {
             onToggleStockFilter = {},
             favoriteProductIds = listOf(1),
             onFavoriteClick = {},
+            showOnlyFavorites = false,
+            onToggleFavoritesFilter = {},
             onProductClick = {}
         )
     }
@@ -268,7 +274,8 @@ data class ProductCatalogUiState(
     val categories: List<String> = emptyList(),
     val searchQuery: String = "",
     val showOnlyInStock: Boolean = false,
-    val favoriteProductIds: List<Int> = emptyList()
+    val favoriteProductIds: List<Int> = emptyList(),
+    val showOnlyFavorites: Boolean = false
 )
 
 // --- ViewModel
@@ -321,6 +328,20 @@ class ProductCatalogViewModel : ViewModel() {
                 }
             currentState.copy(
                 favoriteProductIds = newFavoriteIds
+            )
+        }
+    }
+
+    fun onToggleFavoritesFilter() {
+        _uiState.update { currentState ->
+            val newValue = !currentState.showOnlyFavorites
+            currentState.copy(
+                showOnlyFavorites = newValue,
+                products = if (newValue) {
+                    currentState.products.filter { currentState.favoriteProductIds.contains(it.id) }
+                } else {
+                    filterProducts(currentState.searchQuery, currentState.showOnlyInStock)
+                }
             )
         }
     }
@@ -380,6 +401,8 @@ fun ProductCatalogScreen(
     favoriteProductIds: List<Int>,
     onFavoriteClick: (Int) -> Unit,
     onProductClick: (ProductUi) -> Unit,
+    showOnlyFavorites: Boolean,
+    onToggleFavoritesFilter: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -431,6 +454,12 @@ fun ProductCatalogScreen(
         }
 
         item {
+            Button(onClick = onToggleFavoritesFilter) {
+                Text(if (showOnlyFavorites) "Afficher tous les produits" else "★ Favoris uniquement")
+            }
+        }
+
+        item {
             CategoryRow(categories = categories)
         }
 
@@ -477,6 +506,8 @@ fun ProductCatalogContainer(
         favoriteProductIds = uiState.favoriteProductIds,
         onFavoriteClick = viewModel::onFavoriteClick,
         onProductClick = onProductClick,
+        showOnlyFavorites = uiState.showOnlyFavorites,
+        onToggleFavoritesFilter = viewModel::onToggleFavoritesFilter,
         modifier = modifier
     )
 }
