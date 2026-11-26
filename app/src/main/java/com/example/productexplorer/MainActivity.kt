@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.example.productexplorer.ui.theme.ProductExplorerTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -63,7 +64,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// --- Function Sample
+// --- Function
 
 fun sampleProduct(): ProductUi {
     return ProductUi(
@@ -272,6 +273,18 @@ fun ProductCatalogScreen(
         mutableStateOf(false)
     }
 
+    var favoriteProductIds by rememberSaveable {
+        mutableStateOf(listOf<Int>())
+    }
+
+    fun toggleFavorite(productId: Int) {
+        favoriteProductIds = if (favoriteProductIds.contains(productId)) {
+            favoriteProductIds - productId
+        } else {
+            favoriteProductIds + productId
+        }
+    }
+
     val filteredProducts = remember(products, searchQuery, showOnlyInStock) {
         products.filter { product ->
             val matchesSearch =
@@ -283,7 +296,6 @@ fun ProductCatalogScreen(
             matchesSearch && matchesStock
         }
     }
-
 
     LazyColumn(
         modifier = modifier
@@ -355,6 +367,10 @@ fun ProductCatalogScreen(
         ) { product ->
             ProductListItem(
                 product = product,
+                isFavorite = favoriteProductIds.contains(product.id),
+                onFavoriteClick = {
+                    toggleFavorite(product.id)
+                },
                 onClick = {
                     onProductClick(product)
                 }
@@ -549,6 +565,8 @@ fun DailyOfferBox(
 @Composable
 fun ProductListItem(
     product: ProductUi,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -582,8 +600,20 @@ fun ProductListItem(
                 color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = onClick) {
-                Text(text = "Voir le produit")
+            Row {
+                Button(onClick = onClick) {
+                    Text(text = "Voir le produit")
+                }
+                Spacer(modifier = modifier.width(8.dp))
+                Button(onClick = onFavoriteClick) {
+                    Text(
+                        text = if (isFavorite) {
+                            "Retirer des favoris"
+                        } else {
+                            "Ajouter aux favoris"
+                        }
+                    )
+                }
             }
         }
     }
