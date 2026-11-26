@@ -177,17 +177,6 @@ fun ProductDetailScreenOutOfStockPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ProductCatalogScreenPreview() {
-    ProductExplorerTheme {
-        ProductCatalogScreen(
-            products = sampleProducts(),
-            onProductClick = {}
-        )
-    }
-}
-
 @Preview(
     showBackground = true,
     name = "Catalogue - Dark Theme"
@@ -234,64 +223,6 @@ data class ProductUi(
 )
 
 // --- Composants
-
-@Composable
-fun ProductListItem(
-    product: ProductUi,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 3.dp
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = product.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = product.brand,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "${product.price} € • ★ ${product.rating}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = onClick) {
-                Text(text = "Voir le produit")
-            }
-        }
-    }
-}
-
-@Composable
-fun CategoryRow(
-    categories: List<String>,
-    modifier: Modifier = Modifier
-) {
-    LazyRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(categories) { category ->
-            CategoryChip(label = category)
-        }
-    }
-}
 
 // ######################################## -- Page Home -- ########################################
 
@@ -548,6 +479,64 @@ fun DailyOfferBox(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.labelMedium
             )
+        }
+    }
+}
+
+@Composable
+fun ProductListItem(
+    product: ProductUi,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 3.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = product.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = product.brand,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "${product.price} € • ★ ${product.rating}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = onClick) {
+                Text(text = "Voir le produit")
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryRow(
+    categories: List<String>,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(categories) { category ->
+            CategoryChip(label = category)
         }
     }
 }
