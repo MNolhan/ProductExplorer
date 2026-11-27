@@ -207,7 +207,9 @@ fun ProductCatalogScreenDarkPreview() {
             onFavoriteClick = {},
             showOnlyFavorites = false,
             onToggleFavoritesFilter = {},
-            onProductClick = {}
+            onProductClick = {},
+            sortByPrice = false,
+            onToggleSortByPrice = {}
         )
     }
 }
@@ -230,7 +232,9 @@ fun ProductCatalogScreenLightPreview() {
             onFavoriteClick = {},
             showOnlyFavorites = false,
             onToggleFavoritesFilter = {},
-            onProductClick = {}
+            onProductClick = {},
+            sortByPrice = false,
+            onToggleSortByPrice = {}
         )
     }
 }
@@ -250,7 +254,9 @@ fun ProductCatalogScreenStatelessPreview() {
             onFavoriteClick = {},
             showOnlyFavorites = false,
             onToggleFavoritesFilter = {},
-            onProductClick = {}
+            onProductClick = {},
+            sortByPrice = false,
+            onToggleSortByPrice = {}
         )
     }
 }
@@ -272,6 +278,7 @@ data class ProductUi(
 )
 
 data class ProductCatalogUiState(
+    val sortByPrice: Boolean = false,
     val products: List<ProductUi> = emptyList(),
     val categories: List<String> = emptyList(),
     val searchQuery: String = "",
@@ -303,7 +310,8 @@ class ProductCatalogViewModel : ViewModel() {
                     searchQuery = newValue,
                     showOnlyInStock = currentState.showOnlyInStock,
                     showOnlyFavorites = currentState.showOnlyFavorites,
-                    favoriteProductIds = currentState.favoriteProductIds
+                    favoriteProductIds = currentState.favoriteProductIds,
+                    sortByPrice = currentState.sortByPrice
                 )
             )
         }
@@ -318,7 +326,8 @@ class ProductCatalogViewModel : ViewModel() {
                     searchQuery = currentState.searchQuery,
                     showOnlyInStock = newShowOnlyInStock,
                     showOnlyFavorites = currentState.showOnlyFavorites,
-                    favoriteProductIds = currentState.favoriteProductIds
+                    favoriteProductIds = currentState.favoriteProductIds,
+                    sortByPrice = currentState.sortByPrice
                 )
             )
         }
@@ -338,7 +347,8 @@ class ProductCatalogViewModel : ViewModel() {
                     searchQuery = currentState.searchQuery,
                     showOnlyInStock = currentState.showOnlyInStock,
                     showOnlyFavorites = currentState.showOnlyFavorites,
-                    favoriteProductIds = newFavoriteIds
+                    favoriteProductIds = newFavoriteIds,
+                    sortByPrice = currentState.sortByPrice
                 )
             )
         }
@@ -353,7 +363,24 @@ class ProductCatalogViewModel : ViewModel() {
                     searchQuery = currentState.searchQuery,
                     showOnlyInStock = currentState.showOnlyInStock,
                     showOnlyFavorites = newValue,
-                    favoriteProductIds = currentState.favoriteProductIds
+                    favoriteProductIds = currentState.favoriteProductIds,
+                    sortByPrice = currentState.sortByPrice
+                )
+            )
+        }
+    }
+
+    fun onToggleSortByPrice() {
+        _uiState.update { currentState ->
+            val newValue = !currentState.sortByPrice
+            currentState.copy(
+                sortByPrice = newValue,
+                products = filterProducts(
+                    searchQuery = currentState.searchQuery,
+                    showOnlyInStock = currentState.showOnlyInStock,
+                    showOnlyFavorites = currentState.showOnlyFavorites,
+                    favoriteProductIds = currentState.favoriteProductIds,
+                    sortByPrice = newValue
                 )
             )
         }
@@ -363,9 +390,10 @@ class ProductCatalogViewModel : ViewModel() {
         searchQuery: String,
         showOnlyInStock: Boolean,
         showOnlyFavorites: Boolean,
-        favoriteProductIds: List<Int>
+        favoriteProductIds: List<Int>,
+        sortByPrice: Boolean
     ): List<ProductUi> {
-        return allProducts.filter { product ->
+        val filtered = allProducts.filter { product ->
             val matchesSearch =
                 product.title.contains(searchQuery, ignoreCase = true) ||
                         product.brand.contains(searchQuery, ignoreCase = true) ||
@@ -376,6 +404,7 @@ class ProductCatalogViewModel : ViewModel() {
                 !showOnlyFavorites || product.id in favoriteProductIds
             matchesSearch && matchesStock && matchesFavorite
         }
+        return if (sortByPrice) filtered.sortedBy { it.price } else filtered
     }
 }
 
@@ -419,7 +448,9 @@ fun ProductCatalogScreen(
     onProductClick: (ProductUi) -> Unit,
     showOnlyFavorites: Boolean,
     onToggleFavoritesFilter: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sortByPrice: Boolean,
+    onToggleSortByPrice: () -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
@@ -476,6 +507,12 @@ fun ProductCatalogScreen(
         }
 
         item {
+            Button(onClick = onToggleSortByPrice) {
+                Text(if (sortByPrice) "Ordre par défaut" else "Trier par prix")
+            }
+        }
+
+        item {
             CategoryRow(categories = categories)
         }
 
@@ -524,6 +561,8 @@ fun ProductCatalogContainer(
         onProductClick = onProductClick,
         showOnlyFavorites = uiState.showOnlyFavorites,
         onToggleFavoritesFilter = viewModel::onToggleFavoritesFilter,
+        sortByPrice = uiState.sortByPrice,
+        onToggleSortByPrice = viewModel::onToggleSortByPrice,
         modifier = modifier
     )
 }
