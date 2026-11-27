@@ -48,6 +48,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.Boolean
+import kotlin.Int
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -299,7 +301,9 @@ class ProductCatalogViewModel : ViewModel() {
                 searchQuery = newValue,
                 products = filterProducts(
                     searchQuery = newValue,
-                    showOnlyInStock = currentState.showOnlyInStock
+                    showOnlyInStock = currentState.showOnlyInStock,
+                    showOnlyFavorites = currentState.showOnlyFavorites,
+                    favoriteProductIds = currentState.favoriteProductIds
                 )
             )
         }
@@ -312,7 +316,9 @@ class ProductCatalogViewModel : ViewModel() {
                 showOnlyInStock = newShowOnlyInStock,
                 products = filterProducts(
                     searchQuery = currentState.searchQuery,
-                    showOnlyInStock = newShowOnlyInStock
+                    showOnlyInStock = newShowOnlyInStock,
+                    showOnlyFavorites = currentState.showOnlyFavorites,
+                    favoriteProductIds = currentState.favoriteProductIds
                 )
             )
         }
@@ -327,7 +333,13 @@ class ProductCatalogViewModel : ViewModel() {
                     currentState.favoriteProductIds + productId
                 }
             currentState.copy(
-                favoriteProductIds = newFavoriteIds
+                favoriteProductIds = newFavoriteIds,
+                products = filterProducts(
+                    searchQuery = currentState.searchQuery,
+                    showOnlyInStock = currentState.showOnlyInStock,
+                    showOnlyFavorites = currentState.showOnlyFavorites,
+                    favoriteProductIds = newFavoriteIds
+                )
             )
         }
     }
@@ -337,16 +349,22 @@ class ProductCatalogViewModel : ViewModel() {
             val newValue = !currentState.showOnlyFavorites
             currentState.copy(
                 showOnlyFavorites = newValue,
-                products = if (newValue) {
-                    currentState.products.filter { currentState.favoriteProductIds.contains(it.id) }
-                } else {
-                    filterProducts(currentState.searchQuery, currentState.showOnlyInStock)
-                }
+                products = filterProducts(
+                    searchQuery = currentState.searchQuery,
+                    showOnlyInStock = currentState.showOnlyInStock,
+                    showOnlyFavorites = newValue,
+                    favoriteProductIds = currentState.favoriteProductIds
+                )
             )
         }
     }
 
-    private fun filterProducts(searchQuery: String, showOnlyInStock: Boolean): List<ProductUi> {
+    private fun filterProducts(
+        searchQuery: String,
+        showOnlyInStock: Boolean,
+        showOnlyFavorites: Boolean,
+        favoriteProductIds: List<Int>
+    ): List<ProductUi> {
         return allProducts.filter { product ->
             val matchesSearch =
                 product.title.contains(searchQuery, ignoreCase = true) ||
@@ -354,16 +372,14 @@ class ProductCatalogViewModel : ViewModel() {
                         product.category.contains(searchQuery, ignoreCase = true)
             val matchesStock =
                 !showOnlyInStock || product.stock > 0
-            matchesSearch && matchesStock
+            val matchesFavorite =
+                !showOnlyFavorites || product.id in favoriteProductIds
+            matchesSearch && matchesStock && matchesFavorite
         }
     }
 }
 
-// --- Composants
-
-// ######################################## -- Page Home -- ########################################
-
-// Page Home
+// --- Page Home ---
 @Composable
 fun ProductHomeScreen(
     featuredProduct: ProductUi,
